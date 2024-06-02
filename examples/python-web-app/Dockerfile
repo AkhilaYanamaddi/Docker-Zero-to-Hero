@@ -1,29 +1,15 @@
-# Use an official Python runtime as a parent image
-FROM python:3.9-slim
+FROM ubuntu
 
-# Set the working directory in the container
 WORKDIR /app
 
-# Install any needed system packages
-RUN apt-get update && apt-get install -y --no-install-recommends \
-    build-essential
+COPY requirements.txt /app
+COPY devops /app
 
-# Copy the current directory contents into the container at /app
-COPY . /app
+RUN apt-get update && \
+    apt-get install -y python3 python3-pip && \
+    pip install -r requirements.txt && \
+    cd devops
 
-# Set up a virtual environment
-RUN python -m venv /venv
-ENV PATH="/venv/bin:$PATH"
-
-# Install any needed packages specified in requirements.txt
-RUN pip install --upgrade pip && \
-    pip install -r requirements.txt
-
-# Make port 8000 available to the world outside this container
-EXPOSE 8000
-
-# Define environment variable
-ENV NAME World
-
-# Run app.py when the container launches
-CMD ["python", "app.py"]
+ENV PIP_BREAK_SYSTEM_PACKAGES 1
+ENTRYPOINT ["python3"]
+CMD ["manage.py", "runserver", "0.0.0.0:8000"]
